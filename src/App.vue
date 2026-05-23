@@ -19,7 +19,7 @@ import ContactSection from './components/ContactSection.vue';
     <ContactSection />
   </main>
   <footer class="site-footer">
-    <p>Built with Vue. Source on <a href="https://github.com/tawhidii/my-folio" target="_blank" rel="noopener">github.com/tawhidii/my-folio</a>.</p>
+    <p>Built with Vue. Source on <a href="https://github.com/tawhidii/tawhidii.github.io" target="_blank" rel="noopener">github.com/tawhidii/tawhidii.github.io</a>.</p>
   </footer>
 </template>
 
