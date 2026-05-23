@@ -8,7 +8,7 @@ const lines = [
   { kind: 'blank',  text: '' },
   { kind: 'prompt', text: 'visitor@bari.dev:~$ cat profile.txt' },
   { kind: 'out',    text: '> 4+ years building backend systems in Python, Go, JS.' },
-  { kind: 'out',    text: '> Currently @ Techjays (Sep 2025 – Apr 2026).' },
+  { kind: 'out',    text: '> Currently @ Mutual Trust Bank PLC (May 2026 – Present).' },
   { kind: 'blank',  text: '' },
   { kind: 'prompt', text: 'visitor@bari.dev:~$ ls sections/' },
   { kind: 'links' },

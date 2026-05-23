@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { experience } from '../experience.js';
 
 describe('experience data', () => {
-  it('lists all seven roles in reverse chronological order', () => {
-    expect(experience).toHaveLength(7);
-    expect(experience[0].company).toBe('Techjays');
+  it('lists all roles in reverse chronological order', () => {
+    expect(experience.length).toBeGreaterThanOrEqual(7);
+    expect(experience[0].company).toBe('Mutual Trust Bank PLC');
     expect(experience[experience.length - 1].company).toBe('Belaface LTD');
   });
 

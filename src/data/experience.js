@@ -1,5 +1,17 @@
 export const experience = [
   {
+    company: 'Mutual Trust Bank PLC',
+    role: 'Software Engineer',
+    start: 'May 2026',
+    end: 'Present',
+    location: 'Dhaka, Bangladesh',
+    bullets: [
+      'Building and maintaining backend services for core banking workflows.',
+      'Working across Java, Python, and SQL to integrate and extend internal systems.',
+    ],
+    tags: ['Java', 'Python', 'SQL'],
+  },
+  {
     company: 'Techjays',
     role: 'Software Engineering Associate',
     start: 'Sep 2025',
