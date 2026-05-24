@@ -14,7 +14,7 @@ async function fetchNotesForTopic(topicId) {
   try {
     const res = await databases.listDocuments(DATABASE_ID, NOTES_COLLECTION_ID, [
       Query.equal('topicId', topicId),
-      Query.orderDesc('updatedAt'),
+      Query.orderDesc('$updatedAt'),
       Query.limit(500),
     ]);
     notesByTopic.value = { ...notesByTopic.value, [topicId]: res.documents };
@@ -26,15 +26,12 @@ async function fetchNotesForTopic(topicId) {
 }
 
 async function createNote(topicId) {
-  const now = new Date().toISOString();
   const doc = await databases.createDocument(DATABASE_ID, NOTES_COLLECTION_ID, ID.unique(), {
     title: 'Untitled',
     topicId,
     contentHtml: '',
     contentJson: JSON.stringify({ type: 'doc', content: [{ type: 'paragraph' }] }),
     excerpt: '',
-    createdAt: now,
-    updatedAt: now,
   });
   const list = notesByTopic.value[topicId] || [];
   notesByTopic.value = { ...notesByTopic.value, [topicId]: [doc, ...list] };
@@ -43,12 +40,8 @@ async function createNote(topicId) {
 }
 
 async function updateNote(id, patch) {
-  const now = new Date().toISOString();
   try {
-    const updated = await databases.updateDocument(DATABASE_ID, NOTES_COLLECTION_ID, id, {
-      ...patch,
-      updatedAt: now,
-    });
+    const updated = await databases.updateDocument(DATABASE_ID, NOTES_COLLECTION_ID, id, patch);
     const topicId = updated.topicId;
     const list = notesByTopic.value[topicId] || [];
     notesByTopic.value = {

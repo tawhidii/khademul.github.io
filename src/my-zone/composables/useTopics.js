@@ -22,7 +22,7 @@ async function fetchTopics() {
   error.value = null;
   try {
     const res = await databases.listDocuments(DATABASE_ID, TOPICS_COLLECTION_ID, [
-      Query.orderAsc('createdAt'),
+      Query.orderAsc('$createdAt'),
       Query.limit(200),
     ]);
     topics.value = res.documents;
@@ -39,24 +39,19 @@ async function ensureLoaded() {
 }
 
 async function createTopic(name) {
-  const now = new Date().toISOString();
   const doc = await databases.createDocument(DATABASE_ID, TOPICS_COLLECTION_ID, ID.unique(), {
     name,
     slug: toSlug(name),
     noteCount: 0,
-    createdAt: now,
-    updatedAt: now,
   });
   topics.value = [...topics.value, doc];
   return doc;
 }
 
 async function renameTopic(id, name) {
-  const now = new Date().toISOString();
   const updated = await databases.updateDocument(DATABASE_ID, TOPICS_COLLECTION_ID, id, {
     name,
     slug: toSlug(name),
-    updatedAt: now,
   });
   topics.value = topics.value.map((t) => (t.$id === id ? updated : t));
   return updated;
