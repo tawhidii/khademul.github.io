@@ -2,6 +2,7 @@
 import './styles/my-zone.css';
 import { useAuth } from './composables/useAuth.js';
 import LoginForm from './LoginForm.vue';
+import NotesShell from './NotesShell.vue';
 
 const { currentUser, loading, logout } = useAuth();
 </script>
@@ -12,11 +13,15 @@ const { currentUser, loading, logout } = useAuth();
       <span class="my-zone__title">my-zone</span>
       <button v-if="currentUser" class="my-zone__logout" @click="logout">logout</button>
     </header>
-    <main class="my-zone__body">
-      <p v-if="loading">…</p>
-      <LoginForm v-else-if="!currentUser" />
-      <p v-else>signed in as {{ currentUser.email }} — notes UI coming next</p>
-    </main>
+    <template v-if="loading">
+      <main class="my-zone__body"><p>…</p></main>
+    </template>
+    <template v-else-if="!currentUser">
+      <main class="my-zone__body"><LoginForm /></main>
+    </template>
+    <template v-else>
+      <NotesShell />
+    </template>
   </div>
 </template>
 

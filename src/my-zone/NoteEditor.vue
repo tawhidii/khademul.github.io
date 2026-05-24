@@ -7,6 +7,8 @@ import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import { useNotes } from './composables/useNotes.js';
+import { uploadImage } from './services/images.js';
+import { onAuthError } from './composables/useAuth.js';
 
 const props = defineProps({
   note: { type: Object, required: true },
@@ -41,11 +43,54 @@ const editor = useEditor({
   ],
   content: parseContent(props.note.contentJson),
   onUpdate: scheduleSave,
+  editorProps: {
+    handlePaste(view, event) {
+      onPaste(event);
+      return false;
+    },
+  },
 });
+
+const fileInput = ref(null);
+
+function onImageClick() {
+  fileInput.value?.click();
+}
+
+async function onFilePicked(e) {
+  const file = e.target.files?.[0];
+  e.target.value = '';
+  if (!file) return;
+  await insertImageFromFile(file);
+}
+
+async function insertImageFromFile(file) {
+  try {
+    const url = await uploadImage(file);
+    editor.value?.chain().focus().setImage({ src: url }).run();
+  } catch (err) {
+    window.alert(`image upload failed: ${err?.message || err}`);
+  }
+}
+
+function onPaste(event) {
+  const items = event.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.kind === 'file' && item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) {
+        event.preventDefault();
+        insertImageFromFile(file);
+        return;
+      }
+    }
+  }
+}
 
 watch(
   () => props.note.$id,
-  () => {
+  (newId) => {
     title.value = props.note.title || '';
     editor.value?.commands.setContent(parseContent(props.note.contentJson) || '', false);
     status.value = { state: 'idle', at: null, message: '' };
@@ -54,8 +99,39 @@ watch(
       debounceHandle = null;
     }
     pendingPayload = null;
+
+    const stashKey = `my-zone:unsaved:${newId}`;
+    try {
+      const raw = sessionStorage.getItem(stashKey);
+      if (raw) {
+        const stash = JSON.parse(raw);
+        const ok = window.confirm('unsaved changes from a previous session — restore?');
+        if (ok) {
+          title.value = stash.title || '';
+          editor.value?.commands.setContent(parseContent(stash.contentJson) || '', false);
+          scheduleSave();
+        }
+        sessionStorage.removeItem(stashKey);
+      }
+    } catch {
+      /* corrupt stash — ignore */
+    }
   }
 );
+
+const offAuthError = onAuthError(() => {
+  const payload = snapshot();
+  if (payload) {
+    try {
+      sessionStorage.setItem(
+        `my-zone:unsaved:${props.note.$id}`,
+        JSON.stringify({ ...payload, savedAt: Date.now() })
+      );
+    } catch {
+      /* storage full or unavailable — best effort */
+    }
+  }
+});
 
 function snapshot() {
   if (!editor.value) return null;
@@ -140,6 +216,7 @@ function statusText() {
 
 onBeforeUnmount(() => {
   if (debounceHandle) clearTimeout(debounceHandle);
+  offAuthError();
   editor.value?.destroy();
 });
 </script>
@@ -169,6 +246,8 @@ onBeforeUnmount(() => {
       <button type="button" :class="{ active: editor.isActive('codeBlock') }" @click="editor.chain().focus().toggleCodeBlock().run()">{ }</button>
       <span class="editor__sep"></span>
       <button type="button" @click="onLinkClick">link</button>
+      <button type="button" @click="onImageClick">image</button>
+      <input ref="fileInput" type="file" accept="image/*" class="editor__file" @change="onFilePicked" />
     </div>
     <EditorContent v-if="editor" :editor="editor" class="editor__content" />
     <footer class="editor__status">
@@ -266,6 +345,10 @@ onBeforeUnmount(() => {
   font-family: inherit;
   font-size: 11px;
   cursor: pointer;
+}
+
+.editor__file {
+  display: none;
 }
 </style>
 
