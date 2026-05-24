@@ -1,0 +1,30 @@
+.my-zone {
+  min-height: 100vh;
+  background: var(--bg, #0a0a0a);
+  color: var(--text, #e6e6e6);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  display: flex;
+  flex-direction: column;
+}
+
+.my-zone__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border, #222);
+}
+
+.my-zone__title {
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: var(--text-dim, #999);
+}
+
+.my-zone__body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim, #999);
+}
