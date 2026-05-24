@@ -26,6 +26,13 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          VITE_APPWRITE_ENDPOINT: ${{ secrets.VITE_APPWRITE_ENDPOINT }}
+          VITE_APPWRITE_PROJECT_ID: ${{ secrets.VITE_APPWRITE_PROJECT_ID }}
+          VITE_APPWRITE_DATABASE_ID: ${{ secrets.VITE_APPWRITE_DATABASE_ID }}
+          VITE_APPWRITE_TOPICS_COLLECTION_ID: ${{ secrets.VITE_APPWRITE_TOPICS_COLLECTION_ID }}
+          VITE_APPWRITE_NOTES_COLLECTION_ID: ${{ secrets.VITE_APPWRITE_NOTES_COLLECTION_ID }}
+          VITE_APPWRITE_IMAGES_BUCKET_ID: ${{ secrets.VITE_APPWRITE_IMAGES_BUCKET_ID }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
