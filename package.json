@@ -11,6 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "appwrite": "^25.2.0",
     "vue": "^3.5.34"
   },
   "devDependencies": {
