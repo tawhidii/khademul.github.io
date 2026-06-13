@@ -1,21 +1,11 @@
 import { ref } from 'vue';
 import { databases, DATABASE_ID, TOPICS_COLLECTION_ID, ID, Query } from '../services/appwrite.js';
+import { toSlug } from '../services/text.js';
 
 const topics = ref([]);
 const loading = ref(false);
 const error = ref(null);
 let loadedOnce = false;
-
-function toSlug(name) {
-  return (
-    name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 80) || 'topic'
-  );
-}
 
 async function fetchTopics() {
   loading.value = true;
