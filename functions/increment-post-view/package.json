@@ -1,0 +1,9 @@
+{
+  "name": "increment-post-view",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "main.js",
+  "dependencies": {
+    "node-appwrite": "^14.0.0"
+  }
+}
