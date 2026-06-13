@@ -1,14 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@500;600;700&display=swap');
 
 :root {
-  --bg:       #0d1117;
-  --bg-elev:  #161b22;
-  --border:   #30363d;
-  --text:     #c9d1d9;
-  --text-dim: #8b949e;
-  --prompt:   #7ee787;
-  --accent:   #58a6ff;
-  --warn:     #f0883e;
+  /* BR2049 teal/cyan LA palette */
+  --bg:       #05080d;
+  --bg-elev:  #0a1018;
+  --border:   #15303a;
+  --text:     #b8d4dd;
+  --text-dim: #5f7d88;
+
+  --cyan:     #5ef2ff;   /* primary */
+  --holo:     #2b6cff;   /* holographic blue */
+  --amber:    #ff9d3c;   /* sparing accent / glow */
+  --danger:   #ff3b6b;   /* magenta */
+
+  /* Map legacy token names so existing components inherit the theme */
+  --prompt:   var(--cyan);
+  --accent:   var(--holo);
+  --warn:     var(--amber);
+
+  --glow-cyan:  0 0 6px rgba(94, 242, 255, 0.55);
+  --glow-amber: 0 0 8px rgba(255, 157, 60, 0.5);
+
+  --font-display: 'Rajdhani', sans-serif;
 
   --fs-xs: 14px;
   --fs-sm: 16px;
@@ -44,7 +57,13 @@ a:hover { text-decoration: underline; }
   border-radius: 2px;
 }
 
-h1, h2, h3 { margin: 0; font-weight: 700; }
+h1, h2, h3 {
+  margin: 0;
+  font-weight: 700;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  text-shadow: var(--glow-cyan);
+}
 h2 { font-size: var(--fs-lg); }
 h3 { font-size: var(--fs-md); }
 
@@ -57,6 +76,19 @@ main {
 section {
   padding-top: var(--rhythm);
   scroll-margin-top: 80px;
+}
+
+@keyframes scanline-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 0 100vh; }
+}
+@keyframes fog-drift {
+  from { transform: translate3d(-2%, 0, 0); }
+  to   { transform: translate3d(2%, 1%, 0); }
+}
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 100% { opacity: 0.06; }
+  20%, 22% { opacity: 0.02; }
 }
 
 @media (prefers-reduced-motion: reduce) {
