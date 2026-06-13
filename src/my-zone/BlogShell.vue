@@ -38,6 +38,7 @@ function onTogglePublish(post) {
           <button class="blog__select" @click="selectedId = post.$id">
             <span class="blog__title">{{ post.title || 'Untitled' }}</span>
             <span :class="['blog__badge', `blog__badge--${post.status}`]">{{ post.status }}</span>
+            <span class="blog__views">· {{ post.views || 0 }} views</span>
           </button>
           <button class="blog__pub" :title="post.status === 'published' ? 'unpublish' : 'publish'" @click="onTogglePublish(post)">
             {{ post.status === 'published' ? '↓' : '↑' }}
@@ -66,6 +67,7 @@ function onTogglePublish(post) {
 .blog__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .blog__badge { font-size: 10px; padding: 1px 6px; border: 1px solid var(--border, #222); border-radius: 2px; }
 .blog__badge--published { color: var(--accent, #6cf); border-color: var(--accent, #6cf); }
+.blog__views { font-size: 10px; color: var(--text-dim, #999); white-space: nowrap; }
 .blog__pub, .blog__delete { background: transparent; border: none; color: var(--text-dim, #999); cursor: pointer; padding: 0 8px; }
 .blog__delete:hover { color: #f66; }
 .blog__empty { padding: 8px; font-size: 12px; color: var(--text-dim, #999); font-style: italic; }
