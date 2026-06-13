@@ -37,4 +37,10 @@ describe('parseCommand', () => {
   it('errors on cd to unknown section', () => {
     expect(parseCommand('cd nope')).toEqual({ type: 'error', message: 'cd: no such section: nope' });
   });
+
+  it('navigates to blog on bare/cd/open', () => {
+    expect(parseCommand('blog')).toEqual({ type: 'navigate', to: '/blog' });
+    expect(parseCommand('cd blog')).toEqual({ type: 'navigate', to: '/blog' });
+    expect(parseCommand('open blog')).toEqual({ type: 'navigate', to: '/blog' });
+  });
 });

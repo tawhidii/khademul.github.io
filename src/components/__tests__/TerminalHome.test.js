@@ -37,11 +37,12 @@ describe('TerminalHome', () => {
     delete window.matchMedia;
   });
 
-  it('renders a clickable link per section', async () => {
+  it('renders a clickable link per section plus blog', async () => {
     const wrapper = mount(TerminalHome, { global: { plugins: [router] } });
     await nextTick();
     const links = wrapper.findAll('.section-link');
-    expect(links).toHaveLength(5);
+    expect(links).toHaveLength(6);
+    expect(wrapper.text()).toContain('blog/');
   });
 
   it('navigates when a section link is clicked', async () => {

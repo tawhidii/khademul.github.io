@@ -26,7 +26,7 @@ const replayText = {
             '> Currently @ Mutual Trust Bank PLC (May 2026 – Present).'],
 };
 
-const sectionLinks = SECTIONS.map((s) => ({ to: `/${s}`, label: `${s}/` }));
+const sectionLinks = [...SECTIONS.map((s) => ({ to: `/${s}`, label: `${s}/` })), { to: '/blog', label: 'blog/' }];
 
 const visibleLines = ref([]);   // boot output
 const history = ref([]);        // post-boot output

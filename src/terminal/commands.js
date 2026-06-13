@@ -1,4 +1,5 @@
 export const SECTIONS = ['about', 'experience', 'skills', 'education', 'contact'];
+export const NAV_TARGETS = [...SECTIONS, 'blog'];
 
 export function parseCommand(input) {
   const raw = String(input).trim();
@@ -21,10 +22,10 @@ export function parseCommand(input) {
       return { type: 'error', message: `cat: ${arg ?? ''}: No such file` };
     case 'cd':
     case 'open':
-      if (SECTIONS.includes(arg)) return { type: 'navigate', to: `/${arg}` };
+      if (NAV_TARGETS.includes(arg)) return { type: 'navigate', to: `/${arg}` };
       return { type: 'error', message: `${cmd}: no such section: ${arg ?? ''}` };
     default:
-      if (SECTIONS.includes(cmd)) return { type: 'navigate', to: `/${cmd}` };
+      if (NAV_TARGETS.includes(cmd)) return { type: 'navigate', to: `/${cmd}` };
       return { type: 'error', message: `command not found: ${cmd}` };
   }
 }
