@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { account } from '../services/appwrite.js';
 
-const currentUser = ref(null);
+export const currentUser = ref(null);
 const loading = ref(true);
 const error = ref(null);
 let bootstrapped = false;
