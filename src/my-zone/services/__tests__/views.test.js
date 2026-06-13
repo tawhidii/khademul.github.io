@@ -18,10 +18,10 @@ describe('recordView', () => {
     createExecution.mockResolvedValue({});
     await recordView('p1');
     expect(createExecution).toHaveBeenCalledTimes(1);
-    const [fnId, body, asyncFlag] = createExecution.mock.calls[0];
-    expect(fnId).toBe('fn1');
-    expect(JSON.parse(body)).toEqual({ postId: 'p1' });
-    expect(asyncFlag).toBe(true);
+    const [params] = createExecution.mock.calls[0];
+    expect(params.functionId).toBe('fn1');
+    expect(JSON.parse(params.body)).toEqual({ postId: 'p1' });
+    expect(params.async).toBe(true);
     expect(localStorage.getItem('blog:viewed:p1')).toBe('1');
   });
 

@@ -9,7 +9,11 @@ export async function recordView(postId) {
     // localStorage unavailable — fall through and try to record once
   }
   try {
-    await functions.createExecution(VIEW_FUNCTION_ID, JSON.stringify({ postId }), true);
+    await functions.createExecution({
+      functionId: VIEW_FUNCTION_ID,
+      body: JSON.stringify({ postId }),
+      async: true,
+    });
   } catch {
     // view tracking is best-effort; never surface to the reader
     return;
