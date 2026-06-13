@@ -1,9 +1,7 @@
 import { useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
-import Underline from '@tiptap/extension-underline';
 import { uploadImage } from '../services/images.js';
 
 function parseContent(raw) {
@@ -14,9 +12,9 @@ function parseContent(raw) {
 export function useDocEditor({ contentJson, placeholder = 'start writing…', onUpdate }) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Underline,
-      Link.configure({ openOnClick: false, HTMLAttributes: { target: '_blank', rel: 'noopener' } }),
+      StarterKit.configure({
+        link: { openOnClick: false, HTMLAttributes: { target: '_blank', rel: 'noopener' } },
+      }),
       Image,
       Placeholder.configure({ placeholder }),
     ],
