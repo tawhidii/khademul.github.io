@@ -6,8 +6,9 @@ import { useNotes } from './composables/useNotes.js';
 const props = defineProps({
   selectedTopicId: { type: String, default: null },
   selectedNoteId: { type: String, default: null },
+  blogActive: { type: Boolean, default: false },
 });
-const emit = defineEmits(['select-topic', 'select-note']);
+const emit = defineEmits(['select-topic', 'select-note', 'select-blog']);
 
 const { topics, ensureLoaded, createTopic, deleteTopic } = useTopics();
 const { notesByTopic, fetchNotesForTopic, createNote, deleteNote } = useNotes();
@@ -79,6 +80,11 @@ async function onDeleteNote(note) {
 
 <template>
   <aside class="sidebar">
+    <button
+      class="sidebar__blog"
+      :class="{ 'sidebar__blog--active': blogActive }"
+      @click="emit('select-blog')"
+    >▸ blog</button>
     <section class="sidebar__section">
       <header class="sidebar__header"><span>topics</span></header>
       <ul class="sidebar__list">
@@ -133,6 +139,23 @@ async function onDeleteNote(note) {
   flex-direction: column;
   overflow-y: auto;
 }
+
+.sidebar__blog {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 20px;
+  background: transparent;
+  color: var(--text-dim, #999);
+  border: none;
+  border-bottom: 1px solid var(--border, #222);
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+.sidebar__blog:hover { color: var(--text, #e6e6e6); }
+.sidebar__blog--active { color: var(--accent, #6cf); }
 
 .sidebar__section {
   padding: 16px 12px;

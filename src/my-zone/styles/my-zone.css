@@ -28,3 +28,12 @@
   justify-content: center;
   color: var(--text-dim, #999);
 }
+
+.my-zone[data-theme='light'] {
+  --bg: #f5f5f2;
+  --bg-elev: #ffffff;
+  --text: #1a1a1a;
+  --text-dim: #555;
+  --border: #d8d8d2;
+  --accent: #2b6cff;
+}
