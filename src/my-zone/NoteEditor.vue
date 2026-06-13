@@ -1,136 +1,21 @@
 <script setup>
 import { onBeforeUnmount, ref, watch } from 'vue';
-import { useEditor, EditorContent } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
-import Placeholder from '@tiptap/extension-placeholder';
-import Underline from '@tiptap/extension-underline';
+import { EditorContent } from '@tiptap/vue-3';
 import { useNotes } from './composables/useNotes.js';
-import { uploadImage } from './services/images.js';
 import { onAuthError } from './composables/useAuth.js';
+import { useDocEditor } from './composables/useDocEditor.js';
+import { useAutosave } from './composables/useAutosave.js';
+import { makeExcerpt } from './services/text.js';
 
-const props = defineProps({
-  note: { type: Object, required: true },
-});
+const props = defineProps({ note: { type: Object, required: true } });
 
 const { updateNote } = useNotes();
-
 const title = ref(props.note.title || '');
-const status = ref({ state: 'idle', at: null, message: '' }); // idle | editing | saving | saved | error
-
-let debounceHandle = null;
-let inFlight = false;
-let pendingPayload = null;
-let lastSavedAt = null;
-
-function parseContent(raw) {
-  if (!raw) return undefined;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return undefined;
-  }
-}
-
-const editor = useEditor({
-  extensions: [
-    StarterKit,
-    Underline,
-    Link.configure({ openOnClick: false, HTMLAttributes: { target: '_blank', rel: 'noopener' } }),
-    Image,
-    Placeholder.configure({ placeholder: 'start writing…' }),
-  ],
-  content: parseContent(props.note.contentJson),
-  onUpdate: scheduleSave,
-  editorProps: {
-    handlePaste(view, event) {
-      onPaste(event);
-      return false;
-    },
-  },
-});
-
 const fileInput = ref(null);
 
-function onImageClick() {
-  fileInput.value?.click();
-}
-
-async function onFilePicked(e) {
-  const file = e.target.files?.[0];
-  e.target.value = '';
-  if (!file) return;
-  await insertImageFromFile(file);
-}
-
-async function insertImageFromFile(file) {
-  try {
-    const url = await uploadImage(file);
-    editor.value?.chain().focus().setImage({ src: url }).run();
-  } catch (err) {
-    window.alert(`image upload failed: ${err?.message || err}`);
-  }
-}
-
-function onPaste(event) {
-  const items = event.clipboardData?.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.kind === 'file' && item.type.startsWith('image/')) {
-      const file = item.getAsFile();
-      if (file) {
-        event.preventDefault();
-        insertImageFromFile(file);
-        return;
-      }
-    }
-  }
-}
-
-watch(
-  () => props.note.$id,
-  (newId) => {
-    title.value = props.note.title || '';
-    editor.value?.commands.setContent(parseContent(props.note.contentJson) || '', false);
-    status.value = { state: 'idle', at: null, message: '' };
-    if (debounceHandle) {
-      clearTimeout(debounceHandle);
-      debounceHandle = null;
-    }
-    pendingPayload = null;
-
-    const stashKey = `my-zone:unsaved:${newId}`;
-    try {
-      const raw = sessionStorage.getItem(stashKey);
-      if (raw) {
-        const stash = JSON.parse(raw);
-        const ok = window.confirm('unsaved changes from a previous session — restore?');
-        if (ok) {
-          title.value = stash.title || '';
-          editor.value?.commands.setContent(parseContent(stash.contentJson) || '', false);
-          scheduleSave();
-        }
-        sessionStorage.removeItem(stashKey);
-      }
-    } catch {
-      /* corrupt stash — ignore */
-    }
-  }
-);
-
-const offAuthError = onAuthError(() => {
-  const payload = snapshot();
-  if (payload) {
-    try {
-      sessionStorage.setItem(
-        `my-zone:unsaved:${props.note.$id}`,
-        JSON.stringify({ ...payload, savedAt: Date.now() })
-      );
-    } catch {
-      /* storage full or unavailable — best effort */
-    }
-  }
+const { editor, insertImageFromFile, onLinkClick, setContent } = useDocEditor({
+  contentJson: props.note.contentJson,
+  onUpdate: () => save.schedule(),
 });
 
 function snapshot() {
@@ -139,83 +24,43 @@ function snapshot() {
     title: title.value,
     contentHtml: editor.value.getHTML(),
     contentJson: JSON.stringify(editor.value.getJSON()),
-    excerpt: editor.value.getText().slice(0, 300),
+    excerpt: makeExcerpt(editor.value.getText()),
   };
 }
 
-function scheduleSave() {
-  status.value = { state: 'editing', at: Date.now(), message: '' };
-  if (debounceHandle) clearTimeout(debounceHandle);
-  debounceHandle = setTimeout(flush, 1000);
-}
+const save = useAutosave((patch) => updateNote(props.note.$id, patch), snapshot);
+const status = save.status;
+const statusText = save.statusText;
 
-async function flush() {
-  if (!editor.value) return;
+function onTitleInput() { save.schedule(); }
+function onImageClick() { fileInput.value?.click(); }
+async function onFilePicked(e) {
+  const file = e.target.files?.[0];
+  e.target.value = '';
+  if (file) await insertImageFromFile(file);
+}
+function retry() { save.retry(); }
+
+watch(
+  () => props.note.$id,
+  () => {
+    title.value = props.note.title || '';
+    setContent(props.note.contentJson);
+    save.cancel();
+  },
+);
+
+const offAuthError = onAuthError(() => {
   const payload = snapshot();
-  if (!payload) return;
-
-  if (inFlight) {
-    pendingPayload = payload;
-    return;
+  if (payload) {
+    try {
+      sessionStorage.setItem(`my-zone:unsaved:${props.note.$id}`, JSON.stringify({ ...payload, savedAt: Date.now() }));
+    } catch { /* best effort */ }
   }
-  inFlight = true;
-  status.value = { state: 'saving', at: Date.now(), message: '' };
-  try {
-    await updateNote(props.note.$id, payload);
-    lastSavedAt = Date.now();
-    status.value = { state: 'saved', at: lastSavedAt, message: '' };
-  } catch (err) {
-    status.value = { state: 'error', at: Date.now(), message: err?.message || 'save failed' };
-  } finally {
-    inFlight = false;
-    if (pendingPayload) {
-      pendingPayload = null;
-      scheduleSave();
-    }
-  }
-}
-
-function retry() {
-  flush();
-}
-
-function onTitleInput() {
-  scheduleSave();
-}
-
-function onLinkClick() {
-  if (!editor.value) return;
-  const previous = editor.value.getAttributes('link').href;
-  const url = window.prompt('URL', previous || 'https://');
-  if (url === null) return;
-  if (url === '') {
-    editor.value.chain().focus().extendMarkRange('link').unsetLink().run();
-    return;
-  }
-  editor.value.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-}
-
-function statusText() {
-  switch (status.value.state) {
-    case 'idle':
-      return '';
-    case 'editing':
-      return 'editing…';
-    case 'saving':
-      return 'saving…';
-    case 'saved': {
-      const secs = Math.max(1, Math.round((Date.now() - status.value.at) / 1000));
-      return `saved · ${secs}s ago`;
-    }
-    case 'error':
-      return `save failed — ${status.value.message}`;
-    default:
-      return '';
-  }
-}
+});
 
 onBeforeUnmount(() => {
-  if (debounceHandle) clearTimeout(debounceHandle);
+  save.cancel();
   offAuthError();
   editor.value?.destroy();
 });
