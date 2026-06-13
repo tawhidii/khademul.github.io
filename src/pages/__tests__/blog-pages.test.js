@@ -9,6 +9,7 @@ vi.mock('../../my-zone/services/posts.js', () => ({
   listPublishedPosts: (...a) => listPublishedPosts(...a),
   getPublishedPostBySlug: (...a) => getPublishedPostBySlug(...a),
 }));
+vi.mock('../../my-zone/services/views.js', () => ({ recordView: vi.fn() }));
 
 import BlogListPage from '../BlogListPage.vue';
 import BlogPostPage from '../BlogPostPage.vue';

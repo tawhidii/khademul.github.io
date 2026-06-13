@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { getPublishedPostBySlug } from '../my-zone/services/posts.js';
+import { recordView } from '../my-zone/services/views.js';
 import ReturnLink from '../components/ReturnLink.vue';
 
 const route = useRoute();
@@ -20,8 +21,12 @@ async function load(slug) {
   post.value = null;
   try {
     const found = await getPublishedPostBySlug(slug);
-    if (found) post.value = found;
-    else notFound.value = true;
+    if (found) {
+      post.value = found;
+      recordView(found.$id);
+    } else {
+      notFound.value = true;
+    }
   } catch {
     notFound.value = true;
   } finally {
